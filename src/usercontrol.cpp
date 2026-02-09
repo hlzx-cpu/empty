@@ -41,7 +41,6 @@ void allDeviceControl() {
     motorTestControl();
 
     TurnTo();
-    PIDDistanceForward();
     autonomous_1();
 }
 
