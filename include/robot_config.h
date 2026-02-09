@@ -9,9 +9,14 @@ using namespace vex;
 extern MyBrain* my_brain;
 extern controller Controller;
 
+extern inertial Inertial;
+
 extern motor Motor_LF;
 extern motor Motor_RF;
 extern motor Motor_LB;
 extern motor Motor_RB;
+extern motor Motor_Drum;
+extern motor Motor_Intake;
+extern motor Motor_Shooter;
 
 #endif

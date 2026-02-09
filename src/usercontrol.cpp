@@ -46,7 +46,7 @@ void autonChooser() {
         int nextVal = (static_cast<int>(auton_type) + 1) % 2;
         auton_type = static_cast<Autotype>(nextVal);
         Controller.Screen.setCursor(5, 1);
-        Controller.Screen.print("Auton %s       ", auto_side_name[nextVal].c_str());
+        Controller.Screen.print("Auton %s       ", auton_type_name[nextVal].c_str());
     }
 }
 

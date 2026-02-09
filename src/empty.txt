@@ -1,0 +1,161 @@
+// 0: stop, 1: intake, 2: LCG, 3: UCG, 4: LG
+static int roller_event = false, last_roller_event = false;
+static float speed_coef = 1.f;
+static bool last_block_at_exit = false;
+bool is_roller_stuck = false, last_is_roller_stuck = false;
+bool is_intaker_stuck = false, last_is_intaker_stuck = false;
+int intake_reverse_duration = 200; // ms
+int roller_reverse_duration = 200; // ms
+int intake_reverse_speed = 100;    // %
+int roller_reverse_speed = 100;    // %
+
+timer roller_refresh_timer;
+timer intaker_refresh_timer;
+timer roller_stuck_timer;
+timer intaker_stuck_timer;
+/**
+ * @param _event 0: stop, 1: intake, 2: LCG, 3: UCG, 4: LG,5: intake full, 6: LG full 7:
+ * park intake
+ */
+void setRollerEvent(int _event) { roller_event = _event; }
+void setRollerSpeedCoef(float _speed_coef) { speed_coef = _speed_coef; }
+void setIntakeReverseDuration(int dur) { intake_reverse_duration = dur; }
+void setRollerReverseDuration(int dur) { roller_reverse_duration = dur; }
+void setIntakeReverseSpeed(int pct) { intake_reverse_speed = pct; }
+void setRollerReverseSpeed(int pct) { roller_reverse_speed = pct; }
+void autonRoller() {
+    roller_refresh_timer.reset();
+    intaker_refresh_timer.reset();
+    roller_stuck_timer.reset();
+    intaker_stuck_timer.reset();
+    int last_roller_degree = Motor_Roller.position(deg);
+    int last_shooter_degree = Motor_Shooter.position(deg);
+    int last_intaker_degree0 = Motor_Intaker[0].position(deg);
+    int last_intaker_degree1 = Motor_Intaker[1].position(deg);
+    bool roller_first_time = true;
+    bool intaker_first_time = true;
+    while (true) {
+        // roller堵转检测（周期500ms）
+        if (roller_refresh_timer.time() > 500) {
+            roller_refresh_timer.reset();
+            bool roller_stopped =
+                abs(Motor_Roller.position(deg) - last_roller_degree) < 10;
+            bool shooter_stopped =
+                abs(Motor_Shooter.position(deg) - last_shooter_degree) < 10;
+            if (roller_event != 0 && (roller_stopped || shooter_stopped)) {
+                is_roller_stuck = true;
+            } else {
+                is_roller_stuck = false;
+            }
+            last_roller_degree = Motor_Roller.position(deg);
+            last_shooter_degree = Motor_Shooter.position(deg);
+        }
+        // intaker堵转检测（周期200ms）
+        if (intaker_refresh_timer.time() > 200) {
+            intaker_refresh_timer.reset();
+            bool intaker_stopped0 =
+                abs(Motor_Intaker[0].position(deg) - last_intaker_degree0) < 60;
+            bool intaker_stopped1 =
+                abs(Motor_Intaker[1].position(deg) - last_intaker_degree1) < 60;
+            if (roller_event != 0 && roller_event != 5 && roller_event != 6 &&
+                (intaker_stopped0 || intaker_stopped1)) {
+                is_intaker_stuck = true;
+            } else {
+                is_intaker_stuck = false;
+            }
+            last_intaker_degree0 = Motor_Intaker[0].position(deg);
+            last_intaker_degree1 = Motor_Intaker[1].position(deg);
+        }
+
+        // 设置反转计时
+        if (!last_is_roller_stuck && is_roller_stuck) {
+            roller_stuck_timer.reset();
+            cout << "Roller stuck, retrying..." << endl;
+        }
+        if (!last_is_intaker_stuck && is_intaker_stuck) {
+            intaker_stuck_timer.reset();
+            cout << "Intaker stuck, retrying..." << endl;
+        }
+        if (!intaker_first_time && intaker_stuck_timer.time() < intake_reverse_duration &&
+            last_roller_event == roller_event) {
+            if (roller_event == 2) {
+                moveIntaker(intake_reverse_speed);
+            } else {
+                moveIntaker(-intake_reverse_speed);
+            }
+        } else if (!roller_first_time &&
+                   roller_stuck_timer.time() < roller_reverse_duration &&
+                   last_roller_event == roller_event) {
+            if (roller_event == 2) {
+                moveRoller(roller_reverse_speed);
+            } else {
+                moveRoller(-roller_reverse_speed);
+            }
+        } else {
+            /*----------FSM---------*/
+            switch (roller_event) {
+                case 0: // stop
+                    moveIntaker(0);
+                    moveRoller(0);
+                    moveShooter(0);
+                    break;
+                case 1: // normal intake
+                    moveIntaker(100 * speed_coef);
+                    moveRoller(80 * speed_coef);
+                    moveShooter(-30 * speed_coef);
+                    setBlocker(true);
+                    break;
+                case 2: // LCG
+                    moveIntaker(-50 * speed_coef);
+                    moveRoller(-80 * speed_coef);
+                    moveShooter(-20 * speed_coef);
+                    setBlocker(true);
+                    break;
+                case 3: // UCG
+                    moveIntaker(100 * speed_coef);
+                    moveRoller(80 * speed_coef);
+                    moveShooter(-100 * speed_coef);
+                    setBlocker(false);
+                    break;
+                case 4: // LG
+                    moveIntaker(100 * speed_coef);
+                    moveRoller(80 * speed_coef);
+                    moveShooter(100 * speed_coef);
+                    setBlocker(true);
+                    break;
+                case 5: // Intake full
+                    moveIntaker(100 * speed_coef);
+                    moveRoller(100 * speed_coef);
+                    moveShooter(-30 * speed_coef);
+                    setBlocker(true);
+                    break;
+                case 6: // LG full
+                    moveIntaker(100 * speed_coef);
+                    moveRoller(80 * speed_coef);
+                    moveShooter(100 * speed_coef);
+                    setBlocker(true);
+                    break;
+                case 7: // park intake
+                    moveIntaker(60 * speed_coef);
+                    moveRoller(100 * speed_coef);
+                    moveShooter(-30 * speed_coef);
+                    setBlocker(true);
+                    break;
+            }
+        }
+
+        last_is_roller_stuck = is_roller_stuck;
+        last_is_intaker_stuck = is_intaker_stuck;
+        last_roller_event = roller_event;
+        last_block_at_exit = blockAtExit();
+
+        this_thread::sleep_for(10);
+
+        if (roller_stuck_timer.time() > 200) {
+            roller_first_time = false;
+        }
+        if (intaker_stuck_timer.time() > 200) {
+            intaker_first_time = false;
+        }
+    }
+}
