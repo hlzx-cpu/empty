@@ -5,36 +5,21 @@
 using namespace std;
 using namespace vex;
 
-void motorTestControl() {
-    // 电机控制示例代码，仅作参考
-    if(R1) {
-        moveTestMotor(100);
-    }
-    else{
-        moveTestMotor(0);
-    }
-}
 
 // 新增
 // 测试函数，按键可以替换，测试完成可将函数注释，不额外占用按键
 void TurnTo() {
-    if(press_A) {
+    if (press_A) {
         press_A = false;
         turnTo(90);
         cout << "TurnTo 90 degrees executed." << endl;
     }
 }
 
-void PIDDistanceForward() {
-    if(press_B) {
-        press_B = false;
-        PIDDistanceForwardRel(60);
-        cout << "PIDDistanceForward 60 units executed." << endl;    
-    }
-}
+
 
 void autonomous_1() {
-    if(press_X) {
+    if (press_X) {
         press_X = false;
         autonomous_1();
     }
@@ -42,7 +27,7 @@ void autonomous_1() {
 
 void autonChooser() {
     if (press_UP) {
-        press_UP = false;//修改按键实现切换不同的自动程序
+        press_UP = false; // 修改按键实现切换不同的自动程序
         int nextVal = (static_cast<int>(auton_type) + 1) % 2;
         auton_type = static_cast<Autotype>(nextVal);
         Controller.Screen.setCursor(5, 1);

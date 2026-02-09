@@ -61,13 +61,7 @@ void moveShooter(float pct) {
     }
 }
 
-static int motor_event = false, last_motor_event = false;
-static int motor_target_speed = 0;
-
-timer intaker_refresh_timer;
-timer shooter_refresh_timer;
-timer intaker_stuck_timer;
-timer shooter_stuck_timer;
+static int motor_event = false;
 
 void setMotorEvent(int _event) { motor_event = _event; }
 

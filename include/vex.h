@@ -10,7 +10,6 @@
 
 using namespace std;
 using namespace vex;
-// 新增
 
 /// @brief Robot Operation Mode
 enum RobotOperationMode { AUTO, USER_CONTROL };
