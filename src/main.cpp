@@ -17,6 +17,6 @@ int main() {
 
     while (true) {
         // 运行其他线程
-        this_thread::sleep_for(2);
+        this_thread::sleep_for(10);
     }
 }

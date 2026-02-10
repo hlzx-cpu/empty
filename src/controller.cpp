@@ -74,6 +74,6 @@ void defineController() {
         if (R2 && !last_R2) press_R2 = true;
         if (last_R2 && !R2) release_R2 = true, press_R2 = false;
 
-        this_thread::sleep_for(2);
+        this_thread::sleep_for(10);
     }
 }
