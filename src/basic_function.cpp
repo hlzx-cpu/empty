@@ -79,12 +79,13 @@ void resetIMU() { Inertial.resetRotation(); }
 //@brief 具体距离获取(cm)
 // 计算过程：轮子的角度 -> 转过的圈数 -> 轮子周长 -> 机器人前进距离
 double getDis() {
+    resetMotor();
     return (Motor_LF.position(rotationUnits::deg) +
             Motor_LB.position(rotationUnits::deg) +
             Motor_RF.position(rotationUnits::deg) +
             Motor_RB.position(rotationUnits::deg)) /
-           4 /*平均每个轮子*/ / 360 /*圈数*/ * 3.25 /*车轮直径*/ * 2.54 /*英寸转化厘米*/ *
-           PI;
+           4 /*平均每个轮子*/ / 360 /*圈数*/ * WheelDiameter /*车轮直径*/ *
+           2.54 /*英寸转化厘米*/ * PI;
 }
 
 //@brief 前进

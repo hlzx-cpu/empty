@@ -14,25 +14,18 @@ void usrctrlDisplay() {
             // Show selected auto program
             Controller.Screen.setCursor(5, 1);
             Controller.Screen.print(
-                "Auto %s       ", auton_type_name[static_cast<int>(auton_side)].c_str());
+                "Auton %s       ", auton_type_name[static_cast<int>(auton_type)].c_str());
             first_time = false;
         }
-        Point pos = Position::getInstance()->getPos();
 
         my_brain->Screen.setCursor(3, 1);
-        my_brain->Screen.print("x: %.2f y: %.2f IMU: %.2f %.2f", pos._x, pos._y,
-                               IMUHeading(), Position::getInstance()->sensorHeading);
+        my_brain->Screen.print("dis: %.2f    IMU: %.2f", getDis(), IMUHeading());
         my_brain->Screen.setCursor(4, 1);
+        my_brain->Screen.print("raw IMU: %.2f", rawIMUHeading());
 
         Controller.Screen.setCursor(2, 1);
-        Controller.Screen.print(
-            "%.2f,%.2f,%.2f           ", Position::getInstance()->getGlobalRelPos()._x,
-            Position::getInstance()->getGlobalRelPos()._y, rawIMUHeading());
+        Controller.Screen.print("dis: %.2f    IMU: %.2f", getDis(), IMUHeading());
 
-        Controller.Screen.setCursor(2, 1);
-        Controller.Screen.print("%.2f %.2f %.2f %.2f", pos._x, pos._y, IMUHeading(),
-                                Position::getInstance()->sensorHeading);
-
-        this_thread::sleep_for(500);
+        this_thread::sleep_for(200);
     }
 }

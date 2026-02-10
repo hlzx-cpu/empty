@@ -3,7 +3,7 @@
 using namespace std;
 
 const double PI = M_PI;
-const float WheelDiameter = 4.0; // 轮子直径，厘米
+const float WheelDiameter = 3.25; // 轮子直径英寸
 
 //@brief IMU修正系数（一般用转10圈计算）
 double IMU_coefficient = 1.0; 
